@@ -297,6 +297,7 @@ func DeletePVCandValidatePVGroup(ctx context.Context, c clientset.Interface, tim
 func createPV(ctx context.Context, c clientset.Interface, timeouts *framework.TimeoutContext, pv *v1.PersistentVolume) (*v1.PersistentVolume, error) {
 	var resultPV *v1.PersistentVolume
 	var lastCreateErr error
+	ginkgo.By(fmt.Sprintf(" **** Creating a PV with following spec: %v", pv))
 	err := wait.PollUntilContextTimeout(ctx, 29*time.Second, timeouts.PVCreate, true, func(ctx context.Context) (done bool, err error) {
 		resultPV, lastCreateErr = c.CoreV1().PersistentVolumes().Create(ctx, pv, metav1.CreateOptions{})
 		if lastCreateErr != nil {
@@ -597,6 +598,8 @@ func MakePersistentVolume(pvConfig PersistentVolumeConfig) *v1.PersistentVolume 
 			UID:        pvConfig.Prebind.UID,
 		}
 	}
+
+	ginkgo.By(fmt.Sprintf("pv labels:  %v", pvConfig.Labels))
 
 	return &v1.PersistentVolume{
 		ObjectMeta: metav1.ObjectMeta{
