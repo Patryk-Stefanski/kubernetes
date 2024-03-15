@@ -19,6 +19,7 @@ package framework
 import (
 	"context"
 	"fmt"
+	"github.com/onsi/ginkgo/v2"
 
 	storagev1 "k8s.io/api/storage/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -42,6 +43,7 @@ func CreateVolume(ctx context.Context, driver TestDriver, config *PerTestConfig,
 	switch volType {
 	case InlineVolume, PreprovisionedPV:
 		if pDriver, ok := driver.(PreprovisionedVolumeTestDriver); ok {
+			ginkgo.By("---------Creating volume for test with pattern 2")
 			return pDriver.CreateVolume(ctx, config, volType)
 		}
 	case CSIInlineVolume, GenericEphemeralVolume, DynamicPV:

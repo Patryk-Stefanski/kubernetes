@@ -322,6 +322,8 @@ func createPV(ctx context.Context, c clientset.Interface, timeouts *framework.Ti
 		return nil, fmt.Errorf("PV Create API error: %w", err)
 	}
 
+	ginkgo.By(fmt.Sprintf("Resulting PV: %v ", resultPV))
+
 	return resultPV, nil
 }
 
@@ -356,6 +358,7 @@ func CreatePVCPV(ctx context.Context, c clientset.Interface, timeouts *framework
 	}
 	// make the pv spec
 	pv := MakePersistentVolume(pvConfig)
+	ginkgo.By(fmt.Sprintf("Creating a pv with following spec: %v", pv))
 
 	ginkgo.By(fmt.Sprintf("Creating a PVC followed by a%s PV", preBindMsg))
 	pvc, err := CreatePVC(ctx, c, ns, pvc)

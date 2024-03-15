@@ -66,6 +66,7 @@ func CreateVolumeResourceWithAccessModes(ctx context.Context, driver TestDriver,
 	f := config.Framework
 	cs := f.ClientSet
 
+	ginkgo.By("---------Creating volume for test with pattern")
 	// Create volume for pre-provisioned volume tests
 	r.Volume = CreateVolume(ctx, driver, config, pattern.VolType)
 
@@ -80,6 +81,7 @@ func CreateVolumeResourceWithAccessModes(ctx context.Context, driver TestDriver,
 		if pDriver, ok := driver.(PreprovisionedPVTestDriver); ok {
 			pvSource, volumeNodeAffinity := pDriver.GetPersistentVolumeSource(false, pattern.FsType, r.Volume)
 			if pvSource != nil {
+				ginkgo.By(fmt.Sprintf("Creating pvc and pv with volumeNodeAffinity: %v", volumeNodeAffinity))
 				r.Pv, r.Pvc = createPVCPV(ctx, f, dInfo.Name, pvSource, volumeNodeAffinity, pattern.VolMode, accessModes)
 				r.VolSource = storageutils.CreateVolumeSource(r.Pvc.Name, false /* readOnly */)
 			}

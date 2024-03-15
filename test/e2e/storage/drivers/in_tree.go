@@ -138,6 +138,7 @@ func (n *nfsDriver) GetVolumeSource(readOnly bool, fsType string, e2evolume stor
 }
 
 func (n *nfsDriver) GetPersistentVolumeSource(readOnly bool, fsType string, e2evolume storageframework.TestVolume) (*v1.PersistentVolumeSource, *v1.VolumeNodeAffinity) {
+	ginkgo.By("USING DRIVER NFS")
 	nv, ok := e2evolume.(*nfsVolume)
 	if !ok {
 		framework.Failf("Failed to cast test volume of type %T to the NFS test volume", e2evolume)
@@ -289,6 +290,7 @@ func (i *iSCSIDriver) GetVolumeSource(readOnly bool, fsType string, e2evolume st
 }
 
 func (i *iSCSIDriver) GetPersistentVolumeSource(readOnly bool, fsType string, e2evolume storageframework.TestVolume) (*v1.PersistentVolumeSource, *v1.VolumeNodeAffinity) {
+	ginkgo.By("USING DRIVER ISCI")
 	iv, ok := e2evolume.(*iSCSIVolume)
 	if !ok {
 		framework.Failf("failed to cast test volume of type %T to the iSCSI test volume", e2evolume)
@@ -477,6 +479,7 @@ func (r *rbdDriver) GetVolumeSource(readOnly bool, fsType string, e2evolume stor
 }
 
 func (r *rbdDriver) GetPersistentVolumeSource(readOnly bool, fsType string, e2evolume storageframework.TestVolume) (*v1.PersistentVolumeSource, *v1.VolumeNodeAffinity) {
+	ginkgo.By("USING DRIVER RBD")
 	rv, ok := e2evolume.(*rbdVolume)
 	if !ok {
 		framework.Failf("failed to cast test volume of type %T to the RBD test volume", e2evolume)
@@ -599,6 +602,7 @@ func (c *cephFSDriver) GetVolumeSource(readOnly bool, fsType string, e2evolume s
 }
 
 func (c *cephFSDriver) GetPersistentVolumeSource(readOnly bool, fsType string, e2evolume storageframework.TestVolume) (*v1.PersistentVolumeSource, *v1.VolumeNodeAffinity) {
+	ginkgo.By("USING DRIVER CEPHS")
 	cv, ok := e2evolume.(*cephVolume)
 	if !ok {
 		framework.Failf("Failed to cast test volume of type %T to the Ceph test volume", e2evolume)
@@ -1109,6 +1113,7 @@ func (g *gcePdDriver) GetVolumeSource(readOnly bool, fsType string, e2evolume st
 }
 
 func (g *gcePdDriver) GetPersistentVolumeSource(readOnly bool, fsType string, e2evolume storageframework.TestVolume) (*v1.PersistentVolumeSource, *v1.VolumeNodeAffinity) {
+	ginkgo.By("USING DRIVER GCE")
 	gv, ok := e2evolume.(*gcePdVolume)
 	if !ok {
 		framework.Failf("Failed to cast test volume of type %T to the GCE PD test volume", e2evolume)
@@ -1253,6 +1258,7 @@ func (v *vSphereDriver) GetVolumeSource(readOnly bool, fsType string, e2evolume 
 }
 
 func (v *vSphereDriver) GetPersistentVolumeSource(readOnly bool, fsType string, e2evolume storageframework.TestVolume) (*v1.PersistentVolumeSource, *v1.VolumeNodeAffinity) {
+	ginkgo.By("USING DRIVER VSPEE")
 	vsv, ok := e2evolume.(*vSphereVolume)
 	if !ok {
 		framework.Failf("Failed to cast test volume of type %T to the vSphere test volume", e2evolume)
@@ -1398,6 +1404,7 @@ func (a *azureDiskDriver) GetVolumeSource(readOnly bool, fsType string, e2evolum
 }
 
 func (a *azureDiskDriver) GetPersistentVolumeSource(readOnly bool, fsType string, e2evolume storageframework.TestVolume) (*v1.PersistentVolumeSource, *v1.VolumeNodeAffinity) {
+	ginkgo.By("USING DRIVER AZURE")
 	av, ok := e2evolume.(*azureDiskVolume)
 	if !ok {
 		framework.Failf("Failed to cast test volume of type %T to the Azure test volume", e2evolume)
@@ -1443,6 +1450,7 @@ func (a *azureDiskDriver) PrepareTest(ctx context.Context, f *framework.Framewor
 func (a *azureDiskDriver) CreateVolume(ctx context.Context, config *storageframework.PerTestConfig, volType storageframework.TestVolType) storageframework.TestVolume {
 	ginkgo.By("creating a test azure disk volume")
 	zone := getInlineVolumeZone(ctx, config.Framework)
+	ginkgo.By(fmt.Sprintf("Got Zone: %s", zone))
 	if volType == storageframework.InlineVolume {
 		// PD will be created in framework.TestContext.CloudConfig.Zone zone,
 		// so pods should be also scheduled there.
@@ -1647,6 +1655,7 @@ func (l *localDriver) SkipUnsupportedTest(pattern storageframework.TestPattern) 
 func (l *localDriver) PrepareTest(ctx context.Context, f *framework.Framework) *storageframework.PerTestConfig {
 	var err error
 	l.node, err = e2enode.GetRandomReadySchedulableNode(ctx, f.ClientSet)
+	ginkgo.By(fmt.Sprintf("Node Selected: %v", l.node))
 	framework.ExpectNoError(err)
 
 	l.hostExec = utils.NewHostExec(f)
@@ -1678,9 +1687,11 @@ func (l *localDriver) PrepareTest(ctx context.Context, f *framework.Framework) *
 func (l *localDriver) CreateVolume(ctx context.Context, config *storageframework.PerTestConfig, volType storageframework.TestVolType) storageframework.TestVolume {
 	switch volType {
 	case storageframework.PreprovisionedPV:
+		ginkgo.By(fmt.Sprintf("Creating a preprovisioned local volume with node %s", l.node.Name))
 		node := l.node
 		// assign this to schedule pod on this node
 		config.ClientNodeSelection = e2epod.NodeSelection{Name: node.Name}
+		ginkgo.By(fmt.Sprintf("Node selection set to %v", config.ClientNodeSelection))
 		return &localVolume{
 			ltrMgr: l.ltrMgr,
 			ltr:    l.ltrMgr.Create(ctx, node, l.volumeType, nil),
@@ -1722,6 +1733,7 @@ func (l *localDriver) nodeAffinityForNode(node *v1.Node) *v1.VolumeNodeAffinity 
 }
 
 func (l *localDriver) GetPersistentVolumeSource(readOnly bool, fsType string, e2evolume storageframework.TestVolume) (*v1.PersistentVolumeSource, *v1.VolumeNodeAffinity) {
+	ginkgo.By("USING DRIVER LOCAL")
 	lv, ok := e2evolume.(*localVolume)
 	if !ok {
 		framework.Failf("Failed to cast test volume of type %T to the local test volume", e2evolume)
@@ -1741,10 +1753,12 @@ func cleanUpVolumeServer(ctx context.Context, f *framework.Framework, serverPod 
 
 func getInlineVolumeZone(ctx context.Context, f *framework.Framework) string {
 	if framework.TestContext.CloudConfig.Zone != "" {
+		ginkgo.By(fmt.Sprintf("framework.TestContext.CloudConfig.Zone is set: %s", framework.TestContext.CloudConfig.Zone))
 		return framework.TestContext.CloudConfig.Zone
 	}
 	// if zone is not specified we will randomly pick a zone from schedulable nodes for inline tests
 	node, err := e2enode.GetRandomReadySchedulableNode(ctx, f.ClientSet)
+	ginkgo.By(fmt.Sprintf("----- Node Selected: %v", node.Name))
 	framework.ExpectNoError(err)
 	zone, ok := node.Labels[v1.LabelFailureDomainBetaZone]
 	if ok {
@@ -1845,6 +1859,7 @@ func (a *azureFileDriver) GetVolumeSource(readOnly bool, fsType string, e2evolum
 }
 
 func (a *azureFileDriver) GetPersistentVolumeSource(readOnly bool, fsType string, e2evolume storageframework.TestVolume) (*v1.PersistentVolumeSource, *v1.VolumeNodeAffinity) {
+	ginkgo.By("USING DRIVER AZURE FILE")
 	av, ok := e2evolume.(*azureFileVolume)
 	if !ok {
 		framework.Failf("Failed to cast test volume of type %T to the Azure test volume", e2evolume)
